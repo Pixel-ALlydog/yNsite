@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>yNSource</title>
+    <link>http://example.org/docs/notes/opengl/</link>
+    <description>Recent content on yNSource</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language><atom:link href="http://example.org/docs/notes/opengl/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>0、环境配置</title>
+      <link>http://example.org/docs/notes/opengl/chapter-0/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/notes/opengl/chapter-0/</guid>
+      <description>想回来写OpenGL笔记的时候没想到第一步OpenGL相关的环境配置已经忘了。。。
+相关环境配置：
+建议参考
+关于重复配置 # 这里使用的是VS2022
+每次新建项目都要配置一次环境，为了不这么麻烦，可以参考这个链接
+关于这篇笔记 # 算是对之前学习的东西进行一次整理复习，第一次写笔记，所以会比较粗糙。
+原文地址</description>
+    </item>
+    
+    <item>
+      <title>Chapter 2</title>
+      <link>http://example.org/docs/notes/opengl/chapter-2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/notes/opengl/chapter-2/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>1、你好，三角形</title>
+      <link>http://example.org/docs/notes/opengl/chapter-1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/notes/opengl/chapter-1/</guid>
+      <description>绘制之前。。 # 在绘制三角形或其它图形之前，最先想到的是创建一个窗口，来显示图形。
+但在OpenGL中，这个过程比较复杂。OpenGL是由一系列变量描述当前如何操作的巨大状态机。这个状态通常被称为OpenGL上下文。一般通过设置选项、操作缓冲更改OpenGL状态。最后使用这个上下文进行渲染。
+所以在一切开始之前，首先要创建一个OpenGL上下文和一个窗口。
+然而这又会遇到一些问题，这些操作在每个系统上是不一样的。因为OpengL真的很抽象意味着很多东西要从底层开始， 这时就要用到一些针对OpenGL的库，这里使用的是GLFW。
+同时又又又又因为，OpenGL驱动版本非常多，里面有很多函数非常乱，需要在运行时查询。 对于开发者而言则需要在运行时获取函数地址并存在某个指针中方便以后调用。为了简化这过程，需要用到GLAD库。
+GLFW # 之后的所有操作中都要用到GLFW，初始化GLFW后，首先告诉GLFW使用opengl的版本，以及工作模式。
+//初始化 glfwInit(); //opengl 版本为3.3 glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //核心模式 glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 接下来就可以定义窗口了，定义窗口大小为800*600，标题为LearnOpenGL， 同时告诉GLFW将window设为当前线程主要上下文。
+GLFWwindow* window = glfwCreateWindow(800, 600, &amp;#34;LearnOpenGL&amp;#34;, NULL, NULL); if (window == NULL) { std::cout &amp;lt;&amp;lt; &amp;#34;Failed to create GLFW window&amp;#34; &amp;lt;&amp;lt; std::endl; glfwTerminate(); return -1; } glfwMakeContextCurrent(window); GLAD # 这会可以开始初始化GLAD，不然之后调用函数会报错。
+if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { std::cout &amp;lt;&amp;lt; &amp;#34;Failed to initialize GLAD&amp;#34; &amp;lt;&amp;lt; std::endl; return -1; } 视口 # 有了显示窗口还不太够，还必须告诉OpenGL渲染窗口的大小，即视口（Viewport）。 这样OpenGL就可以根据窗口大小显示数据和坐标。</description>
+    </item>
+    
+  </channel>
+</rss>

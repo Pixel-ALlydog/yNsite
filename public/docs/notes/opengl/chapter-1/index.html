@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="绘制之前。。 # 在绘制三角形或其它图形之前，最先想到的是创建一个窗口，来显示图形。
+但在OpenGL中，这个过程比较复杂。OpenGL是由一系列变量描述当前如何操作的巨大状态机。这个状态通常被称为OpenGL上下文。一般通过设置选项、操作缓冲更改OpenGL状态。最后使用这个上下文进行渲染。
+所以在一切开始之前，首先要创建一个OpenGL上下文和一个窗口。
+然而这又会遇到一些问题，这些操作在每个系统上是不一样的。因为OpengL真的很抽象意味着很多东西要从底层开始， 这时就要用到一些针对OpenGL的库，这里使用的是GLFW。
+同时又又又又因为，OpenGL驱动版本非常多，里面有很多函数非常乱，需要在运行时查询。 对于开发者而言则需要在运行时获取函数地址并存在某个指针中方便以后调用。为了简化这过程，需要用到GLAD库。
+GLFW # 之后的所有操作中都要用到GLFW，初始化GLFW后，首先告诉GLFW使用opengl的版本，以及工作模式。
+//初始化 glfwInit(); //opengl 版本为3.3 glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //核心模式 glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 接下来就可以定义窗口了，定义窗口大小为800*600，标题为LearnOpenGL， 同时告诉GLFW将window设为当前线程主要上下文。
+GLFWwindow* window = glfwCreateWindow(800, 600, &#34;LearnOpenGL&#34;, NULL, NULL); if (window == NULL) { std::cout &lt;&lt; &#34;Failed to create GLFW window&#34; &lt;&lt; std::endl; glfwTerminate(); return -1; } glfwMakeContextCurrent(window); GLAD # 这会可以开始初始化GLAD，不然之后调用函数会报错。
+if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { std::cout &lt;&lt; &#34;Failed to initialize GLAD&#34; &lt;&lt; std::endl; return -1; } 视口 # 有了显示窗口还不太够，还必须告诉OpenGL渲染窗口的大小，即视口（Viewport）。 这样OpenGL就可以根据窗口大小显示数据和坐标。">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="1、你好，三角形" />
+<meta property="og:description" content="绘制之前。。 # 在绘制三角形或其它图形之前，最先想到的是创建一个窗口，来显示图形。
+但在OpenGL中，这个过程比较复杂。OpenGL是由一系列变量描述当前如何操作的巨大状态机。这个状态通常被称为OpenGL上下文。一般通过设置选项、操作缓冲更改OpenGL状态。最后使用这个上下文进行渲染。
+所以在一切开始之前，首先要创建一个OpenGL上下文和一个窗口。
+然而这又会遇到一些问题，这些操作在每个系统上是不一样的。因为OpengL真的很抽象意味着很多东西要从底层开始， 这时就要用到一些针对OpenGL的库，这里使用的是GLFW。
+同时又又又又因为，OpenGL驱动版本非常多，里面有很多函数非常乱，需要在运行时查询。 对于开发者而言则需要在运行时获取函数地址并存在某个指针中方便以后调用。为了简化这过程，需要用到GLAD库。
+GLFW # 之后的所有操作中都要用到GLFW，初始化GLFW后，首先告诉GLFW使用opengl的版本，以及工作模式。
+//初始化 glfwInit(); //opengl 版本为3.3 glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //核心模式 glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 接下来就可以定义窗口了，定义窗口大小为800*600，标题为LearnOpenGL， 同时告诉GLFW将window设为当前线程主要上下文。
+GLFWwindow* window = glfwCreateWindow(800, 600, &#34;LearnOpenGL&#34;, NULL, NULL); if (window == NULL) { std::cout &lt;&lt; &#34;Failed to create GLFW window&#34; &lt;&lt; std::endl; glfwTerminate(); return -1; } glfwMakeContextCurrent(window); GLAD # 这会可以开始初始化GLAD，不然之后调用函数会报错。
+if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { std::cout &lt;&lt; &#34;Failed to initialize GLAD&#34; &lt;&lt; std::endl; return -1; } 视口 # 有了显示窗口还不太够，还必须告诉OpenGL渲染窗口的大小，即视口（Viewport）。 这样OpenGL就可以根据窗口大小显示数据和坐标。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/docs/notes/opengl/chapter-1/" /><meta property="article:section" content="docs" />
+
+
+<title>1、你好，三角形 | yNSource</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png" >
+<link rel="stylesheet" href="/book.min.f8de3645fe00591b41524aee174e19edd98a22255a2930a0cdc82a94835ba387.css" integrity="sha256-&#43;N42Rf4AWRtBUkruF04Z7dmKIiVaKTCgzcgqlINbo4c=" crossorigin="anonymous">
+  <script defer src="/flexsearch.min.js"></script>
+  <script defer src="/en.search.min.39a95801f0181de9ddc747075d1d84e570062ce9bade1a88f938b3e1c10bc006.js" integrity="sha256-OalYAfAYHendx0cHXR2E5XAGLOm63hqI&#43;Tiz4cELwAY=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/"><span>yNSource</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-574b1a2b668b65d846660d1f8c5a4bfb" class="toggle" checked />
+    <label for="section-574b1a2b668b65d846660d1f8c5a4bfb" class="flex justify-between">
+      <a role="button" class="">Notes</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-bb2ab200655ce2564c4316e41241ab04" class="toggle" checked />
+    <label for="section-bb2ab200655ce2564c4316e41241ab04" class="flex justify-between">
+      <a href="/docs/notes/opengl/" class="">Open Gl</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/notes/opengl/chapter-0/" class="">0、环境配置</a>
+  
+
+        </li>
+      
+    
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/notes/opengl/chapter-1/" class="active">1、你好，三角形</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://github.com/Pixel-ALlydog/yNSource"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://themes.gohugo.io/hugo-book/"  target="_blank" rel="noopener">
+        Hugo Themes
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>1、你好，三角形</strong>
+
+  <label for="toc-control">
+    
+    <img src="/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#绘制之前">绘制之前。。</a></li>
+        <li><a href="#glfw">GLFW</a></li>
+        <li><a href="#glad">GLAD</a></li>
+        <li><a href="#视口">视口</a></li>
+        <li><a href="#opengl渲染管线">OpenGL渲染管线</a></li>
+        <li><a href="#顶点输入">顶点输入</a>
+          <ul>
+            <li><a href="#顶点着色器">顶点着色器</a></li>
+            <li><a href="#片段着色器">片段着色器</a></li>
+          </ul>
+        </li>
+        <li><a href="#顶点属性">顶点属性</a></li>
+        <li><a href="#顶点数组对象">顶点数组对象</a></li>
+        <li><a href="#the-triangle">The triangle</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h2 id="绘制之前">
+  绘制之前。。
+  <a class="anchor" href="#%e7%bb%98%e5%88%b6%e4%b9%8b%e5%89%8d">#</a>
+</h2>
+<p>在绘制三角形或其它图形之前，最先想到的是创建一个窗口，来显示图形。</p>
+<p>但在OpenGL中，这个过程比较复杂。OpenGL是由一系列变量描述当前如何操作的巨大状态机。这个状态通常被称为OpenGL上下文。一般通过设置选项、操作缓冲更改OpenGL状态。最后使用这个上下文进行渲染。</p>
+<p>所以在一切开始之前，首先要<strong>创建一个OpenGL上下文和一个窗口。</strong></p>
+<p>然而这又会遇到一些问题，这些操作在每个系统上是不一样的。<del>因为OpengL真的很抽象</del>意味着很多东西要从底层开始，
+这时就要用到一些针对OpenGL的库，这里使用的是GLFW。</p>
+<p>同时又又又又因为，OpenGL驱动版本非常多，里面有很多函数非常乱，需要在运行时查询。
+对于开发者而言则需要在运行时获取函数地址并存在某个指针中方便以后调用。为了简化这过程，需要用到GLAD库。</p>
+<h2 id="glfw">
+  GLFW
+  <a class="anchor" href="#glfw">#</a>
+</h2>
+<p>之后的所有操作中都要用到GLFW，初始化GLFW后，首先告诉GLFW使用opengl的版本，以及工作模式。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">//初始化
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glfwInit(); 
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//opengl 版本为3.3
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, <span style="color:#ae81ff">3</span>);
+</span></span><span style="display:flex;"><span>glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, <span style="color:#ae81ff">3</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//核心模式
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  
+</span></span></code></pre></div><p>接下来就可以定义窗口了，定义窗口大小为800*600，标题为LearnOpenGL，
+同时告诉GLFW将window设为当前线程主要上下文。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>GLFWwindow<span style="color:#f92672">*</span> window <span style="color:#f92672">=</span> glfwCreateWindow(<span style="color:#ae81ff">800</span>, <span style="color:#ae81ff">600</span>, <span style="color:#e6db74">&#34;LearnOpenGL&#34;</span>, NULL, NULL);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (window <span style="color:#f92672">==</span> NULL)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Failed to create GLFW window&#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>    glfwTerminate();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>glfwMakeContextCurrent(window);
+</span></span></code></pre></div><h2 id="glad">
+  GLAD
+  <a class="anchor" href="#glad">#</a>
+</h2>
+<p>这会可以开始初始化GLAD，不然之后调用函数会报错。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Failed to initialize GLAD&#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="视口">
+  视口
+  <a class="anchor" href="#%e8%a7%86%e5%8f%a3">#</a>
+</h2>
+<p>有了显示窗口还不太够，还必须告诉OpenGL渲染窗口的大小，即视口（Viewport）。
+这样OpenGL就可以根据窗口大小显示数据和坐标。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>glViewport(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">800</span>, <span style="color:#ae81ff">600</span>);
+</span></span></code></pre></div><p>前面两个参数控制窗口左下角的位置，后两个参数控制大小（单位为像素）</p>
+<p>一切完成后，再使用一个循环让窗口一直显示，这被称为渲染循环。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">//渲染循环
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">while</span>(<span style="color:#f92672">!</span>glfwWindowShouldClose(window)) <span style="color:#75715e">//判断window是否被要求退出
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>{
+</span></span><span style="display:flex;"><span>    glfwSwapBuffers(window);    <span style="color:#75715e">//交换颜色缓冲，绘制图形（存储window中每个像素颜色值的缓冲）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    glfwPollEvents();    <span style="color:#75715e">//检查触发时间
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><p>最后释放分配的资源</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>glfwTerminate();
+</span></span></code></pre></div><p>此时便完成了窗口的显示，编译运行后可以看到一个黑色的窗口，也可以更改窗口颜色</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">//渲染循环
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">while</span>(<span style="color:#f92672">!</span>glfwWindowShouldClose(window)) <span style="color:#75715e">//判断window是否被要求退出
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//输入
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//渲染
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    glClearColor(<span style="color:#ae81ff">0.2f</span>, <span style="color:#ae81ff">0.3f</span>, <span style="color:#ae81ff">0.3f</span>, <span style="color:#ae81ff">1.0f</span>);   <span style="color:#75715e">//改颜色
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    glClear(GL_COLOR_BUFFER_BIT);   <span style="color:#75715e">//清空颜色缓冲，也有其它缓冲如depth buffer、stencil buffer
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//检查并调用事件
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    glfwSwapBuffers(window);    <span style="color:#75715e">//交换颜色缓冲，绘制图形（存储window中每个像素颜色值的缓冲）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    glfwPollEvents();    <span style="color:#75715e">//检查触发时间
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>glfwTerminate();
+</span></span></code></pre></div><h2 id="opengl渲染管线">
+  OpenGL渲染管线
+  <a class="anchor" href="#opengl%e6%b8%b2%e6%9f%93%e7%ae%a1%e7%ba%bf">#</a>
+</h2>
+<p>我们最终的目的是为了绘制三角形，现在已经有了窗口，但是距离渲染绘制仍有一段距离。</p>
+<p>从所周知，我们生活的世界是三维的，但我们看的屏幕却是二维的。
+在OpenGL中，任何事物也都是3D的。为了将3D坐标转化为显示在窗口上2D坐标，这个过程称为图形渲染管线（Graphics Pipeline）。</p>
+<p>图形管线可以分为两个主要部分：</p>
+<ul>
+<li>将3D坐标转为2D坐标</li>
+<li>将2D坐标转为有颜色的像素 <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></li>
+</ul>
+<p>关于OpenGL的图形渲染管线可以参考下图</p>
+<p><img src="/learnOpenGL/pipeline.webp" alt="图形管线" /></p>
+<p>可以看到在不同的阶段上都有一个各自运行的小程序，这些小程序被称为着色器，它们都在GPU上运行。</p>
+<p>在经过一系列处理后，将3个3D的坐标转换为2D的像素输出。</p>
+<h2 id="顶点输入">
+  顶点输入
+  <a class="anchor" href="#%e9%a1%b6%e7%82%b9%e8%be%93%e5%85%a5">#</a>
+</h2>
+<p>现在可以想象由空间中一组顶点坐标的集合构成的一个三角形。</p>
+<p>但是注意在OpenGL中只处理（-1,1）区间内的坐标，这范围叫做标准化设备坐标，这个范围以外的坐标不会显示在屏幕上。</p>
+<p>所以我们想好一组后可以将其归一化，或者是直接想一组在范围内的坐标，为了更好展示直接把z轴设为0。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">float</span> vertices[] <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-</span><span style="color:#ae81ff">0.5f</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">0.5f</span>, <span style="color:#ae81ff">0.0f</span>,
+</span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">0.5f</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">0.5f</span>, <span style="color:#ae81ff">0.0f</span>,
+</span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">0.0f</span>,  <span style="color:#ae81ff">0.5f</span>, <span style="color:#ae81ff">0.0f</span>
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>接下来就需要用到顶点着色器处理顶点数据，这意味着我们需要把数据传入到GPU中处理，同时还要告诉GPU如何处理这些数据。</p>
+<p>使用CPU发送数据到显卡相对较慢，此时就要用到顶点缓冲对象（Vertex Buffer Objects, VBO）来储存传入的数据，
+再由GPU进行处理。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> VBO;   <span style="color:#75715e">//标号或者说名字， 又叫缓冲ID，意味着可以有很多个VBO，需要ID区分
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glGenBuffers(<span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>VBO);  <span style="color:#75715e">//生成VBO对象
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glBindBuffer(GL_ARRAY_BUFFER, VBO);     <span style="color:#75715e">//绑定缓冲类型，GL_ARRAY_BUFFER表示为顶点缓冲对象，给到VBO上（这里指的是缓冲ID）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glBufferData(GL_ARRAY_BUFFER, <span style="color:#66d9ef">sizeof</span>(vertices), vertices, GL_STATIC_DRAW);  <span style="color:#75715e">//将数据给到缓冲GL_ARRAY_BUFFER里
+</span></span></span></code></pre></div><p>glBufferData()函数里第四个参数中指定了显卡如何管理给定的数据：</p>
+<ul>
+<li>GL_STATIC_DRAW ：数据不会或几乎不会改变。</li>
+<li>GL_DYNAMIC_DRAW：数据会被改变很多。</li>
+<li>GL_STREAM_DRAW ：数据每次绘制时都会改变。</li>
+</ul>
+<h3 id="顶点着色器">
+  顶点着色器
+  <a class="anchor" href="#%e9%a1%b6%e7%82%b9%e7%9d%80%e8%89%b2%e5%99%a8">#</a>
+</h3>
+<p>接下来我们就需要创建顶点着色器来处理顶点数据，不过在此之前需要了解一下OpenGL中的着色器。</p>
+<p>现代OpenGL需要我们至少设置一个顶点和片段着色器，这些着色器是用GLSL语言写的。
+<del>这表明编写后的着色器无法在VS中编译运行</del></p>
+<p>为了编译着色器需要用到GLFW相关函数进行编译</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>vertexShaderSource <span style="color:#f92672">=</span> 
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;#version 330 core</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>   <span style="color:#75715e">//版本
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#34;layout (location = 0) in vec3 aPos;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span> <span style="color:#75715e">//接收顶点数据，location为位置
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#34;void main()</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;{</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span> <span style="color:#75715e">//齐次坐标
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#34;}</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> vertexShader;
+</span></span><span style="display:flex;"><span>vertexShader <span style="color:#f92672">=</span> glCreateShader(GL_VERTEX_SHADER);
+</span></span><span style="display:flex;"><span>glShaderSource(vertexShader, <span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>vertexShaderSource, NULL);
+</span></span><span style="display:flex;"><span>glCompileShader(vertexShader);
+</span></span></code></pre></div><h3 id="片段着色器">
+  片段着色器
+  <a class="anchor" href="#%e7%89%87%e6%ae%b5%e7%9d%80%e8%89%b2%e5%99%a8">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>fragmentShaderSource <span style="color:#f92672">=</span> 
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;#version 330 core</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;out vec4 FragColor;&#34;</span>   <span style="color:#75715e">//输出值，这里为RGB值
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#34;void main()</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;{</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);&#34;</span>  <span style="color:#75715e">//定义颜色值
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#34;}</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> fragmentShader;
+</span></span><span style="display:flex;"><span>fragmentShader <span style="color:#f92672">=</span> glCreateShader(GL_FRAGMENT_SHADER);
+</span></span><span style="display:flex;"><span>glShaderSource(fragmentShader, <span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>fragmentShaderSource, NULL);
+</span></span><span style="display:flex;"><span>glCompileShader(fragmentShader);
+</span></span></code></pre></div><h2 id="顶点属性">
+  顶点属性
+  <a class="anchor" href="#%e9%a1%b6%e7%82%b9%e5%b1%9e%e6%80%a7">#</a>
+</h2>
+<p>顶点着色器允许我们指定任何以顶点属性为形式的输入。这使其具有很强的灵活性的同时，它还的确意味着我们必须手动指定输入数据的哪一个部分对应顶点着色器的哪一个顶点属性。所以，我们必须在渲染前指定OpenGL该如何解释顶点数据。</p>
+<p>对于之前的三角形顶点数据，应该被解析为下图所示：</p>
+<p><img src="/learnOpenGl/pipeline.webp" alt="" /></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">//配置顶点属性
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//第一个参数将顶点属性的位置设为0。
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//第二个参数指定顶点属性的大小，顶点由3个值组成。
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//第三个参数指定数据的类型
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//第四个参数表明是否将数据标准化
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//第五个参数为步长，每三个值的位置表明一组数据
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//最后一个参数表示起始值的偏移量
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glVertexAttribPointer(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">3</span>, GL_FLOAT, GL_FALSE, <span style="color:#ae81ff">3</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>), (<span style="color:#66d9ef">void</span><span style="color:#f92672">*</span>)<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//以顶点属性位置值为参考，启用顶点属性
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glEnableVertexAttribArray(<span style="color:#ae81ff">0</span>);
+</span></span></code></pre></div><h2 id="顶点数组对象">
+  顶点数组对象
+  <a class="anchor" href="#%e9%a1%b6%e7%82%b9%e6%95%b0%e7%bb%84%e5%af%b9%e8%b1%a1">#</a>
+</h2>
+<p>为了不用对每个顶点属性进行配置，于是就有了顶点数组对象(Vertex Array Object, VAO)。
+这使在不同顶点数据和属性配置之间切换变得非常简单，只需要绑定不同的VAO就行了。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> VAO;
+</span></span><span style="display:flex;"><span>glGenVertexArrays(<span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>VAO);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//绑定VAO
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glBindVertexArray(VAO);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//把顶点数组复制到缓冲中供OpenGL使用
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glBindBuffer(GL_ARRAY_BUFFER, VBO);
+</span></span><span style="display:flex;"><span>glBufferData(GL_ARRAY_BUFFER, <span style="color:#66d9ef">sizeof</span>(vertices), vertices, GL_STATIC_DRAW);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//设置顶点属性指针
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>glVertexAttribPointer(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">3</span>, GL_FLOAT, GL_FALSE, <span style="color:#ae81ff">3</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>), (<span style="color:#66d9ef">void</span><span style="color:#f92672">*</span>)<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>glEnableVertexAttribArray(<span style="color:#ae81ff">0</span>);
+</span></span></code></pre></div><h2 id="the-triangle">
+  The triangle
+  <a class="anchor" href="#the-triangle">#</a>
+</h2>
+<p>在完成前面一系列操作后，只需要在渲染循环里调用函数即可绘制三角形。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">while</span> (<span style="color:#f92672">!</span>glfwWindowShouldClose(window))
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//input
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        glClearColor(<span style="color:#ae81ff">0.2f</span>, <span style="color:#ae81ff">0.3f</span>, <span style="color:#ae81ff">0.3f</span>, <span style="color:#ae81ff">1.0f</span>);
+</span></span><span style="display:flex;"><span>        glClear(GL_COLOR_BUFFER_BIT);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//使用顶点和片段着色器
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        glUseProgram(shaderProgram);
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//绑定VAO
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        glBindVertexArray(VAO);
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//绘制图形，第二个参数指定了顶点数组的起始索引，第三个参数指定绘制多少顶点
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        glDrawArrays(GL_TRIANGLES, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">3</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        glfwSwapBuffers(window);
+</span></span><span style="display:flex;"><span>        glfwPollEvents();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    glDeleteVertexArrays(<span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>VAO);
+</span></span><span style="display:flex;"><span>    glDeleteBuffers(<span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>VBO);
+</span></span><span style="display:flex;"><span>    glDeleteProgram(shaderProgram);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    glfwTerminate();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>2D坐标和像素是不同的，前者表示在2D空间中的精确位置，后者只是该点的近似，受到了屏幕/窗口分辨率的限制&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#绘制之前">绘制之前。。</a></li>
+        <li><a href="#glfw">GLFW</a></li>
+        <li><a href="#glad">GLAD</a></li>
+        <li><a href="#视口">视口</a></li>
+        <li><a href="#opengl渲染管线">OpenGL渲染管线</a></li>
+        <li><a href="#顶点输入">顶点输入</a>
+          <ul>
+            <li><a href="#顶点着色器">顶点着色器</a></li>
+            <li><a href="#片段着色器">片段着色器</a></li>
+          </ul>
+        </li>
+        <li><a href="#顶点属性">顶点属性</a></li>
+        <li><a href="#顶点数组对象">顶点数组对象</a></li>
+        <li><a href="#the-triangle">The triangle</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
