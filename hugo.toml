@@ -1,0 +1,29 @@
+baseURL = 'http://example.org/'
+languageCode = 'zh-cn'
+title = 'yNSource'
+theme = 'hugo-book'
+
+[markup]
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.tableOfContents]
+  startLevel = 1
+
+[menu]
+# [[menu.before]]
+[[menu.after]]
+  name = "Github"
+  url = "https://github.com/Pixel-ALlydog/yNSource"
+  weight = 10
+
+[[menu.after]]
+  name = "Hugo Themes"
+  url = "https://themes.gohugo.io/hugo-book/"
+  weight = 20
+
+[params]
+BookTheme = 'auto'
+BookSection = 'docs'
+BookToC = true
+BookRepo = 'https://github.com/Pixel-ALlydog/yNSource'
