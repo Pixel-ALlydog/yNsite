@@ -26,4 +26,5 @@ theme = 'hugo-book'
 BookTheme = 'auto'
 BookSection = 'docs'
 BookToC = true
+BookDateFormat = 'Jan 2, 2006'
 BookRepo = 'https://github.com/Pixel-ALlydog/yNsite'
