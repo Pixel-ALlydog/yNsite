@@ -123,7 +123,7 @@ glfwTerminate();
 
 关于OpenGL的图形渲染管线可以参考下图
 
-![图形管线](/learnOpenGL/pipeline.webp)
+![](https://cdn.jsdelivr.net/gh/Pixel-ALlydog/blog-img/opengl/pipeline.png)
 
 可以看到在不同的阶段上都有一个各自运行的小程序，这些小程序被称为着色器，它们都在GPU上运行。
 
@@ -209,7 +209,7 @@ glCompileShader(fragmentShader);
 
 对于之前的三角形顶点数据，应该被解析为下图所示：
 
-![](/learnOpenGl/pipeline.webp)
+![](https://cdn.jsdelivr.net/gh/Pixel-ALlydog/blog-img/opengl/vertex_attribute_pointer.png)
 
 
 ```c++
