@@ -8,7 +8,7 @@ weight: 4
 # bookComments: false
 # bookSearchExclude: false
 ---
-# 变换
+# 物体运动
 
 想要让物体运动，就要用到矩阵(Matrix)对物体进行变换(Transform)。不过在此之前需要了解相关的数学运算。
 
@@ -180,4 +180,200 @@ T= \left[\begin{matrix}
   \end{matrix}\right]
 {{< /katex >}}
 
-### 与向量
+# 变换
+在OpenGL中通常使用4*4的变换矩阵（这会使得计算更加方便）。
+
+假设一组顶点
+{{< katex display >}}
+A = 
+\left[\begin{matrix}
+   x_1 & x_2 & x_3 \\
+   y_1 & y_2 & y_3 \\
+   z_1 & z_2 & z_3 \\
+   1   & 1   & 1
+  \end{matrix}\right]
+{{< /katex >}}
+
+
+这时就可以通过数学运算对顶点进行各种操作。比如缩放（Scaling）
+{{< katex display >}}
+n \cdot A = 
+\left[\begin{matrix}
+   nx_1 & nx_2 & nx_3 \\
+   ny_1 & ny_2 & ny_3 \\
+   nz_1 & nz_2 & nz_3 \\
+   n    & n    & n
+  \end{matrix}\right]
+{{< /katex >}}
+
+
+但这样并不完全对，我们并不想将最后一行也变为n，这会就要用到矩阵相乘，现在再设一组矩阵，叫做变换矩阵
+{{< katex display >}}
+T = 
+\left[\begin{matrix}
+   a & 0 & 0 & 0\\
+   0 & b & 0 & 0\\
+   0 & 0 & c & 0\\
+   0 & 0 & 0 & 1
+  \end{matrix}\right]
+{{< /katex >}}
+
+
+此时再做乘法，就可以在各个轴上进行缩放。
+为了方便这里只用一个顶点运算，之后也只使用一个顶点
+{{< katex display >}}
+\left[\begin{matrix}
+   a & 0 & 0 & 0 \\
+   0 & b & 0 & 0 \\
+   0 & 0 & c & 0 \\
+   0 & 0 & 0 & 1
+\end{matrix}\right]
+\cdot
+\left[\begin{matrix}
+   x\\
+   y\\
+   z\\
+   1
+  \end{matrix}\right] = 
+\left[\begin{matrix}
+   ax\\
+   by\\
+   cz\\
+   1
+  \end{matrix}\right]
+{{< /katex >}}
+
+## 变换矩阵
+顶点数据总是不变的，我们只需要改变变换矩阵就可对物体进行各种操作。现在设变换后的顶点数组为
+{{< katex  >}}P{{< /katex  >}}
+可以知道
+{{< katex display >}}
+P = T\cdot A
+{{< /katex  >}}
+
+### 平移(Translation)
+若想进行平移操作，则变换矩阵为
+{{< katex display >}}
+T = 
+\left[\begin{matrix}
+   1 & 0 & 0 & t_x \\
+   0 & 1 & 0 & t_y \\
+   0 & 0 & 1 & t_z \\
+   0 & 0 & 0 & 1
+  \end{matrix}\right]
+{{< /katex  >}}
+
+变换后的顶点数据为
+{{< katex display >}}
+P = 
+\left[\begin{matrix}
+   1 & 0 & 0 & t_x \\
+   0 & 1 & 0 & t_y \\
+   0 & 0 & 1 & t_z \\
+   0 & 0 & 0 & 1
+  \end{matrix}\right]
+\cdot 
+\left[\begin{matrix}
+   x\\
+   y\\
+   z\\
+   1
+  \end{matrix}\right] =
+  \left[\begin{matrix}
+   x + t_x\\
+   y + t_y\\
+   z + t_z\\
+   1
+  \end{matrix}\right]
+{{< /katex  >}}
+
+### 旋转(Rotation)
+旋转则比较复杂，在3D空间中旋转需要定义一个角和一个旋转轴(Rotation Axis)。
+物体会沿着给定的旋转轴旋转特定角度。
+
+沿x轴旋转：
+{{< katex display >}}
+T = 
+\left[\begin{matrix}
+   1 & 0 & 0 & 0 \\
+   0 & cos\theta & -sin\theta & 0 \\
+   0 & sin\theta & cos\theta & 0 \\
+   0 & 0 & 0 & 1
+  \end{matrix}\right]
+{{< /katex  >}}
+
+沿y轴旋转：
+{{< katex display >}}
+T = 
+\left[\begin{matrix}
+   cos\theta & 0 & sin\theta & 0 \\
+   0 & 1 & 0 & 0 \\
+   -sin\theta & 0 & cos\theta & 0 \\
+   0 & 0 & 0 & 1
+  \end{matrix}\right]
+{{< /katex  >}}
+
+沿z轴旋转：
+{{< katex display >}}
+T = 
+\left[\begin{matrix}
+   cos\theta & -sin\theta & 0 & 0 \\
+   sin\theta & cos\theta & 0 & 0 \\
+   0 & 0 & 1 & 0 \\
+   0 & 0 & 0 & 1
+  \end{matrix}\right]
+{{< /katex  >}}
+
+虽然这样已经可以完成旋转操作，但是仍有一个问题，这会导致万向锁（Gimbal Lock）~~旋转轴重合~~，可能也许会在以后其它地方讲到，现在只需要知道有这么一个问题就行。
+
+## 变换顺序
+现在可以假设各种变换矩阵，R（旋转）、S（缩放）、T（平移），若想先平移后再旋转再进缩放，则可以这样表示
+{{< katex display >}}
+P = S\cdot R\cdot T\cdot A
+{{< /katex  >}}
+
+
+# 回到OpenGL
+现在有了变换矩阵后，就可以开始各种操作了。
+
+## GLM
+GLM是OpenGL Mathematics的缩写，它是一个只有头文件的库，也就是说我们只需包含对应的头文件就行了，不用链接和编译。GLM可以在它们的[网站](https://glm.g-truc.net/0.9.9/index.html)上下载。
+
+```c++
+glm::mat4 trans = glm::mat4(1.0f);
+//平移
+trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0));
+//旋转
+trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0,0,1.0));
+//缩放
+trans = glm::scale(trans,glm::vec3(0.5,0.5,0.5));
+//传给着色器
+unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+```
+首先查询uniform变量的地址，然后用有Matrix4fv后缀的glUniform函数把矩阵数据发送给着色器。
+
+第一个参数是uniform的位置值。
+第二个参数告诉OpenGL我们将要发送多少个矩阵，这里是1。
+第三个参数询问我们是否希望对我们的矩阵进行转置(Transpose)，也就是说交换我们矩阵的行和列。
+
+OpenGL开发者通常使用一种内部矩阵布局，叫做列主序(Column-major Ordering)布局。GLM的默认布局就是列主序，所以并不需要转置矩阵，我们填GL_FALSE。最后一个参数是真正的矩阵数据，但是GLM并不是把它们的矩阵储存为OpenGL所希望接受的那种，因此我们要先用GLM的自带的函数value_ptr来变换这些数据。
+
+
+接下来就是将变换矩阵传给顶点着色器，定义一个uniform的mat4变量，接受数据
+```glsl
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoord;
+
+out vec2 TexCoord;
+
+uniform mat4 transform;
+
+void main()
+{
+    gl_Position = transform * vec4(aPos, 1.0f);
+    TexCoord = vec2(aTexCoord.x, 1.0 - aTexCoord.y);
+}
+```
+
