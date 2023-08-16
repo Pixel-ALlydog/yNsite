@@ -11,7 +11,7 @@ weight: 3
 
 # 着色器
 
-为了更方便编写着色器，可以使用C++文件流读取着色器内容，参考[这个链接](https://learnopengl.com/code_viewer_gh.php?code=includes/learnopengl/shader_s.h)。
+为了更方便编写着色器，可以使用C++文件流读取着色器内容，参考[这个链接](https://learnopengl.com/code_viewer_gh.php?code=includes/learnopengl/shader_m.h)。
 
 
 ## GLSL
