@@ -159,12 +159,12 @@ glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 while()
 {
 	//...
-	glm::mat4 model = mat4(1.0f);
-	glm::mat4 view = mat4(1.0f);
+	glm::mat4 model = glm::mat4(1.0f);
+	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection;
 
-	view = glm::lookAt(cmaeraPos, cameraPos + cameraFront, cameraUp);
-	projection = glm::(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 	//...
 }
 ```
@@ -207,7 +207,7 @@ while()
 	//...
 
 	//启用着色器
-	ourshader.use()
+	ourshader.use();
 	ourshader.setMat4("model", model);
 	ourshader.setMat4("view", view);
 	ourshader.setMat4("projection", projection);
