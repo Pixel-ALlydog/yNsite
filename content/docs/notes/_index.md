@@ -9,7 +9,7 @@ bookCollapseSection: true
 ### Hk416
 
 images
-![Hk416](https://cdn.jsdelivr.net/gh/Pixel-ALlydog/blog-img/origin_202101031422327730.jpg)
+![](https://cdn.jsdelivr.net/gh/Pixel-ALlydog/blog-img/origin_202101031422327730.jpg)
 
 ## about katex
 
