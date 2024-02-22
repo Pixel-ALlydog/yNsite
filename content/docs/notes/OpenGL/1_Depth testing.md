@@ -18,6 +18,8 @@ weight: 8
 
 默认情况禁用，使用glEnable(GL_DEPTH_TEST)启用
 
+使用[glDepthFunc](https://docs.gl/gl3/glDepthFunc)指定用于深度缓冲区的比较方法
+
 ## 深度值精度
 深度缓冲包含了一个介于0.0和1.0之间的深度值，对于z轴的距离使用线性变换进行归一化：
 {{< katex display >}}
