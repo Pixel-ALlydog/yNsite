@@ -35,7 +35,7 @@ glStencilFunc、glStencilOp、glStencilMask。
 glEnable(GL_DEPTH_TEST);                            //启用深度测试
 glEnable(GL_STENCIL_TEST);                          //启用模板测试
 glStencilOp(GL_KEEP, GL_KEEP, GL_REFERENCE);        //三种情况如下， KEEP指保持stencil值，REFERENCE修改为glStencilFunc中ref的值
-//stencil fail， stencil pass & depth fail, stencil pass & depth fail
+//stencil fail， stencil pass & depth fail, stencil pass & depth pass
 ...
 ...
 while(!WindowClose) {
