@@ -1,0 +1,37 @@
+---
+date: 2024-03-13
+title: Ray Tracing
+weight: 3
+bookToC: false
+bookHidden: false
+---
+Why Ray Tracing?\
+-- 更好的阴影！\
+-- 更好的反射！\
+-- 更好的效果！
+
+# Base Ray Tracing Algorithm
+## Light Rays
+图形学中认为:
+1. 光沿直线传播（尽管这是错的）
+2. 光线之间不会“碰撞”（还是错的）
+3. 光源发出光线经过各种路径来到眼睛（光的可逆性）
+
+Ray tracing在做的就是从眼睛（相机）开始，通过Ray Casting还原光线路径。
+
+## Ray Casting
+1. 在每个像素投射光线来生成图片
+2. 检查光源能被眼睛看到的同时是否能被光源照到
+
+### Generating Eye Rays
+首先认为眼睛是个针孔摄像机（为一个点），光源也为一个点，并且认为光线打到场景中各个物体会发生完美的反射或折射。
+
+eye ray经过透视投影空间中的near plan后，检查是否与物体相交，若产生焦点，在焦点处与光源连线，判断该线于场景中物体是否有焦点，若没有则认为光源照亮该点，否则认为该点在阴影中。
+
+## Recursive Ray Tracing
+
+
+
+
+
+

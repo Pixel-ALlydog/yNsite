@@ -1,6 +1,6 @@
 ---
 date: 2024-03-11
-title: Texture
+title: Texture antialiasing
 weight: 1
 ---
 # 纹理显示
